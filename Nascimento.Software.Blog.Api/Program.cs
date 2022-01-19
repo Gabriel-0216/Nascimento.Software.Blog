@@ -19,6 +19,7 @@ builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
 builder.Services.AddScoped<IRepository<UserRole>, UserRoleRepository>();
 builder.Services.AddScoped<IRepository<Category>, CategoryRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IRepository<PostTag>, PostTagRepository>();
 
 
 var app = builder.Build();

@@ -1,6 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 namespace Domain.Domain
 {
+    [Table("Post")]
     public class Post
     {
         public Post()
@@ -20,6 +21,7 @@ namespace Domain.Domain
         public string Slug { get; set; } = string.Empty;
         public DateTime CreateDate { get; set; } = DateTime.Now;
         public DateTime LastUpdateDate { get; set; } = DateTime.Now;
+        [Write(false)]
         public List<Tag> Tags { get; set; }
     }
 }

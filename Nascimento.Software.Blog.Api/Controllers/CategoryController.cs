@@ -8,7 +8,6 @@ namespace Nascimento.Software.Blog.Api.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-
         private readonly IRepository<Category> _categoryRepo;
         public CategoryController(IRepository<Category> _categoryRepo)
         {

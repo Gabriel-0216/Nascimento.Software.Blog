@@ -51,7 +51,38 @@ namespace Infra.Posts
             }, splitOn: "Id");
             return items;
         }
-
+        public async Task<IEnumerable<Post>> GetPostsComplete()
+        {
+            var query = @"Select [Post].*, [Category].*, [User].*, [Tag].*
+                                    FROM 
+                                    [Post]
+                    LEFT JOIN [Category] on [Category].Id = [Post].[CategoryId]
+                    LEFT JOIN [User] on [User].[ID] = [Post].[AuthorId]
+                    Left JOIN [PostTag] on [PostTag].PostId = [Post].[Id]
+                    LEFT JOIN [Tag] ON [PostTag].TagId = [Tag].[Id]";
+            var posts = new List<Post>();
+            var items = await _conn.QueryAsync<Post, Category, User, Tag, Post>(query, (post, category, user, tag) =>
+            {
+                var pst = posts.FirstOrDefault(p => p.Id == post.Id);
+                if (pst == null)
+                {
+                    pst = post;
+                    if (tag != null)
+                    {
+                        pst.Tags.Add(tag);
+                    }
+                    posts.Add(pst);
+                    pst.Category = category;
+                    pst.Author = user;
+                }
+                else
+                {
+                    pst.Tags.Add(tag);
+                }
+                return post;
+            }, splitOn: "Id");
+            return posts;
+        }
         public async Task<IEnumerable<Post>> GetPostWithTags()
         {
             var query = @"Select [Post].*, [Tag].*
@@ -86,5 +117,11 @@ namespace Infra.Posts
         public async Task<bool> Remove(Post entity) => await _conn.DeleteAsync<Post>(entity);
 
         public async Task<bool> Update(Post entity) => await _conn.UpdateAsync<Post>(entity);
+
+        public async Task<int> CreatePost(Post post)
+        {
+            var idInserted = await _conn.InsertAsync<Post>(post);
+            return idInserted;
+        }
     }
 }

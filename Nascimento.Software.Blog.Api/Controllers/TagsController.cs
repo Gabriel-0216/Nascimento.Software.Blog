@@ -27,5 +27,6 @@ namespace Nascimento.Software.Blog.Api.Controllers
             return Ok(await _tagRepo.Create(tag));
         }
 
+
     }
 }

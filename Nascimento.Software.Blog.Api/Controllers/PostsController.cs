@@ -1,5 +1,8 @@
-﻿using Infra.Posts;
+﻿using Domain.Domain;
+using Infra;
+using Infra.Posts;
 using Microsoft.AspNetCore.Mvc;
+using Nascimento.Software.Blog.Api.Dto;
 
 namespace Nascimento.Software.Blog.Api.Controllers
 {
@@ -8,12 +11,10 @@ namespace Nascimento.Software.Blog.Api.Controllers
     public class PostsController : ControllerBase
     {
         private readonly IPostRepository _postRepo;
-
-        /*ToDo: 
-         
-         */
-        public PostsController(IPostRepository postRepo)
+        private readonly IRepository<PostTag> _postTagRepo;
+        public PostsController(IPostRepository postRepo, IRepository<PostTag> postTagRepo)
         {
+            _postTagRepo = postTagRepo;
             _postRepo = postRepo;
         }
         [HttpGet]
@@ -34,5 +35,39 @@ namespace Nascimento.Software.Blog.Api.Controllers
         {
             return Ok(await _postRepo.GetPostsByCategoryId(Id));
         }
+        [HttpGet]
+        [Route("get-posts-complete")]
+        public async Task<ActionResult> GetPostsComplete()
+        {
+            return Ok(await _postRepo.GetPostsComplete());
+        }
+        [HttpPost]
+        [Route("insert-posts")]
+        public async Task<ActionResult> InsertPosts(PostDto post)
+        {
+            var postModel = new Post()
+            {
+                Slug = post.Slug,
+                Summary = post.Summary,
+                AuthorId = post.AuthorId,
+                Body = post.Body,
+                CategoryId = post.CategoryId,
+                CreateDate = DateTime.Now,
+                LastUpdateDate = DateTime.Now,
+                Title = post.Title,
+            };
+            var insertPost = await _postRepo.CreatePost(postModel);
+            foreach (var item in post.Tags)
+            {
+                var postTag = new PostTag()
+                {
+                    PostId = insertPost,
+                    TagId = item.TagId,
+                };
+                var insertTags = await _postTagRepo.Create(postTag);
+            }
+            return Ok();
+        }
+
     }
 }
